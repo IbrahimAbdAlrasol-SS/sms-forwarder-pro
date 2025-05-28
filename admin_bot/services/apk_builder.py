@@ -301,12 +301,13 @@ def prepare_flutter_project(template_path, output_path, config):
     
     return project_path
 
-def build_flutter_apk(project_path, dart_defines=None):
+def build_flutter_apk(project_path, dart_defines=None, timeout=1800):
     """بناء APK باستخدام Flutter
     
     Args:
         project_path: مسار مشروع Flutter
         dart_defines: المتغيرات البيئية
+        timeout: المهلة الزمنية بالثواني (الافتراضي: 30 دقيقة)
         
     Returns:
         مسار ملف APK الناتج
@@ -319,17 +320,38 @@ def build_flutter_apk(project_path, dart_defines=None):
         if dart_defines:
             for key, value in dart_defines.items():
                 build_cmd.extend(["--dart-define", f"{key}={value}"])
-                
-        # Execute the build command
+        
+        # إنشاء ملف للسجل
+        log_file = os.path.join(project_path, "build_log.txt")
+        
+        # Execute the build command with timeout
         logger.info(f"Starting Flutter APK build in {project_path}")
-        process = subprocess.run(
-            build_cmd,
-            cwd=project_path,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+        logger.info(f"Build command: {' '.join(build_cmd)}")
+        logger.info(f"Build timeout set to {timeout} seconds")
+        
+        with open(log_file, 'w') as f:
+            process = subprocess.Popen(
+                build_cmd,
+                cwd=project_path,
+                stdout=f,
+                stderr=subprocess.STDOUT,
+                text=True
+            )
+            
+            # استخدام مؤقت للتحكم في وقت البناء
+            try:
+                process.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                logger.error(f"Flutter build timed out after {timeout} seconds")
+                raise Exception(f"عملية البناء استغرقت وقتًا طويلاً (تجاوزت {timeout} ثانية). يرجى التحقق من سجل البناء.")
+        
+        # التحقق من نتيجة العملية
+        if process.returncode != 0:
+            with open(log_file, 'r') as f:
+                error_log = f.read()
+            logger.error(f"Flutter APK build failed with code {process.returncode}\n{error_log}")
+            raise Exception(f"فشل بناء APK: رمز الخطأ {process.returncode}. راجع سجل البناء للتفاصيل.")
         
         # Locate the output APK file
         apk_path = os.path.join(
@@ -340,7 +362,7 @@ def build_flutter_apk(project_path, dart_defines=None):
             logger.info(f"Flutter APK built successfully: {apk_path}")
             return apk_path
         else:
-            raise FileNotFoundError(f"Output APK file not found")
+            raise FileNotFoundError(f"ملف APK الناتج غير موجود")
             
     except subprocess.CalledProcessError as e:
         logger.error(f"Flutter APK build failed: {e.stderr}")

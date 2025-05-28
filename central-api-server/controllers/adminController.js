@@ -50,7 +50,7 @@ exports.create = async (req, res) => {
   }
 };
 
-// تسجيل دخول المدير
+// تسجيل الدخول للمدير
 exports.login = async (req, res) => {
   try {
     // التحقق من صحة الطلب
@@ -79,17 +79,17 @@ exports.login = async (req, res) => {
       });
     }
 
-    // تحديث وقت آخر تسجيل دخول
+    // إنشاء توكن JWT
+    const token = jwt.sign(
+      { admin_id: admin.admin_id, username: admin.username, role: admin.role },
+      process.env.API_TOKEN,
+      { expiresIn: "24h" }
+    );
+
+    // تحديث آخر تسجيل دخول
     await Admin.update(
       { last_login: new Date() },
       { where: { admin_id: admin.admin_id } }
-    );
-
-    // إنشاء توكن JWT
-    const token = jwt.sign(
-      { id: admin.admin_id, username: admin.username, role: admin.role },
-      process.env.API_TOKEN,
-      { expiresIn: "24h" }
     );
 
     // إرسال الاستجابة مع التوكن
@@ -104,6 +104,40 @@ exports.login = async (req, res) => {
       message: err.message || "حدث خطأ أثناء تسجيل الدخول."
     });
   }
+};
+
+// التحقق من توكن JWT
+exports.verifyToken = (req, res, next) => {
+  // الحصول على التوكن من رأس الطلب
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(403).send({
+      message: "لم يتم توفير توكن الوصول!"
+    });
+  }
+
+  // التحقق من صحة التوكن
+  jwt.verify(token, process.env.API_TOKEN, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({
+        message: "غير مصرح به! التوكن غير صالح أو منتهي الصلاحية."
+      });
+    }
+    req.adminData = decoded;
+    next();
+  });
+};
+
+// التحقق من صلاحيات المدير الرئيسي
+exports.isOwner = (req, res, next) => {
+  if (req.adminData.role !== 'owner') {
+    return res.status(403).send({
+      message: "مطلوب صلاحيات المدير الرئيسي!"
+    });
+  }
+  next();
 };
 
 // استرجاع جميع المدراء
@@ -131,14 +165,14 @@ exports.findOne = async (req, res) => {
     
     if (!admin) {
       return res.status(404).send({
-        message: `لم يتم العثور على مدير برقم المعرف ${id}.`
+        message: `لم يتم العثور على مدير بالمعرف ${id}.`
       });
     }
     
     res.send(admin);
   } catch (err) {
     res.status(500).send({
-      message: `حدث خطأ أثناء استرجاع المدير برقم المعرف ${id}.`
+      message: `حدث خطأ أثناء استرجاع المدير بالمعرف ${id}.`
     });
   }
 };
@@ -152,11 +186,11 @@ exports.update = async (req, res) => {
     const admin = await Admin.findByPk(id);
     if (!admin) {
       return res.status(404).send({
-        message: `لم يتم العثور على مدير برقم المعرف ${id}.`
+        message: `لم يتم العثور على مدير بالمعرف ${id}.`
       });
     }
 
-    // إعداد بيانات التحديث
+    // تحضير بيانات التحديث
     const updateData = {};
     
     if (req.body.username) {
@@ -176,13 +210,20 @@ exports.update = async (req, res) => {
       
       updateData.username = req.body.username;
     }
-    
+
     if (req.body.password) {
+      // تشفير كلمة المرور الجديدة
       const salt = await bcrypt.genSalt(10);
       updateData.password = await bcrypt.hash(req.body.password, salt);
     }
-    
+
     if (req.body.role) {
+      // التحقق من أن المدير لا يقوم بتغيير دوره الخاص
+      if (admin.admin_id === req.adminData.admin_id && req.body.role !== 'owner') {
+        return res.status(400).send({
+          message: "لا يمكنك تغيير دورك من مدير رئيسي!"
+        });
+      }
       updateData.role = req.body.role;
     }
 
@@ -192,11 +233,11 @@ exports.update = async (req, res) => {
     });
 
     res.send({
-      message: "تم تحديث بيانات المدير بنجاح."
+      message: "تم تحديث المدير بنجاح."
     });
   } catch (err) {
     res.status(500).send({
-      message: err.message || `حدث خطأ أثناء تحديث المدير برقم المعرف ${id}.`
+      message: err.message || `حدث خطأ أثناء تحديث المدير بالمعرف ${id}.`
     });
   }
 };
@@ -206,18 +247,18 @@ exports.delete = async (req, res) => {
   const id = req.params.id;
 
   try {
+    // التحقق من أن المدير لا يحاول حذف نفسه
+    if (parseInt(id) === req.adminData.admin_id) {
+      return res.status(400).send({
+        message: "لا يمكنك حذف حسابك الخاص!"
+      });
+    }
+
     // التحقق من وجود المدير
     const admin = await Admin.findByPk(id);
     if (!admin) {
       return res.status(404).send({
-        message: `لم يتم العثور على مدير برقم المعرف ${id}.`
-      });
-    }
-
-    // التحقق من عدم حذف المدير الرئيسي (owner)
-    if (admin.role === 'owner') {
-      return res.status(403).send({
-        message: "لا يمكن حذف المدير الرئيسي!"
+        message: `لم يتم العثور على مدير بالمعرف ${id}.`
       });
     }
 
@@ -227,47 +268,11 @@ exports.delete = async (req, res) => {
     });
 
     res.send({
-      message: "تم حذف المدير بنجاح!"
+      message: "تم حذف المدير بنجاح."
     });
   } catch (err) {
     res.status(500).send({
-      message: err.message || `حدث خطأ أثناء حذف المدير برقم المعرف ${id}.`
-    });
-  }
-};
-
-// التحقق من صلاحية التوكن (middleware)
-exports.verifyToken = (req, res, next) => {
-  const token = req.headers["x-access-token"] || req.headers["authorization"];
-
-  if (!token) {
-    return res.status(403).send({
-      message: "لم يتم توفير توكن للوصول!"
-    });
-  }
-
-  try {
-    // إزالة البادئة "Bearer " إذا كانت موجودة
-    const tokenValue = token.startsWith("Bearer ") ? token.slice(7) : token;
-    
-    // التحقق من صلاحية التوكن
-    const decoded = jwt.verify(tokenValue, process.env.API_TOKEN);
-    req.adminData = decoded;
-    next();
-  } catch (err) {
-    return res.status(401).send({
-      message: "غير مصرح! التوكن غير صالح أو منتهي الصلاحية."
-    });
-  }
-};
-
-// التحقق من صلاحيات المدير (middleware)
-exports.isOwner = (req, res, next) => {
-  if (req.adminData && req.adminData.role === 'owner') {
-    next();
-  } else {
-    res.status(403).send({
-      message: "غير مصرح! مطلوب صلاحيات المدير الرئيسي."
+      message: err.message || `حدث خطأ أثناء حذف المدير بالمعرف ${id}.`
     });
   }
 };
