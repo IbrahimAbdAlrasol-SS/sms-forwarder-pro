@@ -8,7 +8,7 @@ Config - ملف الإعدادات
 """
 
 # إعدادات البوت
-BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"  # توكن بوت تيليجرام
+BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"  # مو  هنا
 LOG_LEVEL = "INFO"  # مستوى التسجيل (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 
 # إعدادات المستخدمين
