@@ -8,16 +8,16 @@ Config - ملف الإعدادات
 """
 
 # إعدادات البوت
-BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"  # مو  هنا
+BOT_TOKEN = "7714918007:AAEmWGdxRB_Blp0PepphvSB2qIOCsKIdxQY"  # مو  هنا
 LOG_LEVEL = "INFO"  # مستوى التسجيل (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 
 # إعدادات المستخدمين
-OWNER_ID = 123456789  # معرف مالك البوت في تيليجرام
-ADMIN_IDS = [987654321, 123123123]  # قائمة بمعرفات المشرفين
+OWNER_ID = 6224395577  # معرف مالك البوت في تيليجرام
+ADMIN_IDS = [7774662207]  # قائمة بمعرفات المشرفين
 
 # إعدادات API
-API_BASE_URL = "https://api.example.com"  # عنوان خادم API المركزي
-API_TOKEN = "YOUR_API_TOKEN"  # توكن الوصول إلى API
+API_BASE_URL = "http://localhost:9000"  # إذا كان الخادم يعمل على جهازك"  # عنوان خادم API المركزي
+API_TOKEN = "5e4OfUIRuNqjlDzQnd1Byr6HmZC9tWAX"  # توكن الوصول إلى API
 
 # إعدادات توليد APK
 APK_TEMPLATE_PATH = "templates/android_app_template"  # مسار قالب تطبيق Android

@@ -7,7 +7,7 @@ Keyboards - تعريف لوحات المفاتيح وهيكلها
 هذا الملف يحتوي على تعريفات لوحات المفاتيح المستخدمة في البوت.
 """
 
-from telegram import InlineKeyboardButton
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 # تعريف أزرار المالك (وصول كامل)
 OWNER_MAIN_MENU = [
@@ -75,3 +75,17 @@ def get_admin_keyboard(menu_items):
     """إنشاء لوحة مفاتيح للأدمن"""
     # يمكن تخصيص لوحة مفاتيح الأدمن بشكل مختلف عن المالك إذا لزم الأمر
     return get_owner_keyboard(menu_items)
+
+
+def get_main_keyboard():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("الأجهزة", callback_data='devices')],
+        [InlineKeyboardButton("إرسال أمر", callback_data='send_command')],
+        [InlineKeyboardButton("الإعدادات", callback_data='settings')]
+    ])
+
+
+def get_back_keyboard():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("العودة", callback_data='main_menu')]
+    ])

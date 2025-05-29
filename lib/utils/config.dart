@@ -2,12 +2,12 @@ class AppConfig {
   // إعدادات API
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.example.com',
+    defaultValue: 'http://localhost:8000"  # إذا كان الخادم يعمل على جهازك',
   );
   
   static const String apiToken = String.fromEnvironment(
     'API_TOKEN',
-    defaultValue: '',
+    defaultValue: '5e4OfUIRuNqjlDzQnd1Byr6HmZC9tWAX',
   );
   
   // إعدادات التطبيق
@@ -18,7 +18,7 @@ class AppConfig {
   
   static const String encryptionKey = String.fromEnvironment(
     'ENCRYPTION_KEY',
-    defaultValue: 'default_key_change_me',
+    defaultValue: 'nAzS0Sk3w4gHQY3g4UMCKWYplzxdXEuI',
   );
   
   // فترات التحديث
