@@ -173,7 +173,6 @@ def handle_button_press(update: Update, context: CallbackContext) -> None:
     query.answer()
     
     # معالجة الأزرار المختلفة
-    # هنا سيتم إضافة المزيد من المنطق لمعالجة الأزرار المختلفة
     if data == "main_menu":
         if is_owner(user_id):
             keyboard = get_owner_keyboard(OWNER_MAIN_MENU)
@@ -189,7 +188,7 @@ def handle_button_press(update: Update, context: CallbackContext) -> None:
             )
     
     # معالجة أزرار الاستهداف
-    elif data == "targeting":
+    elif data == "targeting" or data == "استهداف_جهاز_محدد":
         if is_owner(user_id):
             keyboard = get_owner_keyboard(OWNER_TARGETING_MENU)
             query.edit_message_text(
@@ -203,7 +202,35 @@ def handle_button_press(update: Update, context: CallbackContext) -> None:
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
     
-    # هنا يمكن إضافة المزيد من معالجات الأزرار
+    # معالجة أزرار إدارة الأجهزة
+    elif data == "devices" or data == "إدارة_الأجهزة":
+        if is_owner(user_id):
+            keyboard = get_owner_keyboard(OWNER_DEVICES_MENU)
+            query.edit_message_text(
+                "قائمة إدارة الأجهزة",
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+        else:
+            # قائمة مناسبة للأدمن
+            query.edit_message_text(
+                "قائمة عرض الأجهزة",
+                reply_markup=get_main_keyboard()
+            )
+    
+    # معالجة باقي الأزرار
+    elif data in ["إدارة_المشتركين", "إدارة_النظام", "إدارة_المبيعات", "المساعدة_والدعم",
+                 "إدارة_العملاء", "الإحصائيات", "المساعدة"]:
+        query.edit_message_text(
+            f"تم اختيار: {data.replace('_', ' ')}",
+            reply_markup=get_back_keyboard()
+        )
+    
+    # أزرار غير معروفة
+    else:
+        query.edit_message_text(
+            f"عذراً، هذه الميزة غير متوفرة حالياً: {data}",
+            reply_markup=get_back_keyboard()
+        )
 
 
 def handle_text_message(update: Update, context: CallbackContext) -> None:

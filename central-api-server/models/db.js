@@ -23,6 +23,7 @@ db.sequelize = sequelize;
 db.device = require("./device.model.js")(sequelize, Sequelize);
 db.sms = require("./sms.model.js")(sequelize, Sequelize);
 db.command = require("./command.model.js")(sequelize, Sequelize);
+db.admin = require("./admin.model.js")(sequelize, Sequelize);
 
 // تعريف العلاقات
 db.device.hasMany(db.sms, { foreignKey: 'device_id', sourceKey: 'device_id' });

@@ -77,15 +77,29 @@ def get_admin_keyboard(menu_items):
     return get_owner_keyboard(menu_items)
 
 
-def get_main_keyboard():
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("الأجهزة", callback_data='devices')],
-        [InlineKeyboardButton("إرسال أمر", callback_data='send_command')],
-        [InlineKeyboardButton("الإعدادات", callback_data='settings')]
-    ])
+def get_main_keyboard(user_id=None):
+    """إنشاء لوحة المفاتيح الرئيسية"""
+    if user_id and is_owner(user_id):
+        keyboard = [
+            [InlineKeyboardButton("📱 إدارة الأجهزة", callback_data="إدارة_الأجهزة")],
+            [InlineKeyboardButton("👥 إدارة المشتركين", callback_data="إدارة_المشتركين")],
+            [InlineKeyboardButton("🎯 استهداف جهاز", callback_data="استهداف_جهاز_محدد")],
+            [InlineKeyboardButton("⚙️ إعدادات النظام", callback_data="إدارة_النظام")],
+            [InlineKeyboardButton("📊 الإحصائيات", callback_data="الإحصائيات")],
+            [InlineKeyboardButton("📞 الدعم", callback_data="المساعدة_والدعم")]
+        ]
+    else:
+        keyboard = [
+            [InlineKeyboardButton("📱 عرض الأجهزة", callback_data="إدارة_الأجهزة")],
+            [InlineKeyboardButton("🎯 استهداف جهاز", callback_data="استهداف_جهاز_محدد")],
+            [InlineKeyboardButton("📊 الإحصائيات", callback_data="الإحصائيات")],
+            [InlineKeyboardButton("📞 الدعم", callback_data="المساعدة")]
+        ]
+    
+    return InlineKeyboardMarkup(keyboard)
 
 
 def get_back_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("العودة", callback_data='main_menu')]
+        [InlineKeyboardButton("⬅️ العودة", callback_data="main_menu")]
     ])

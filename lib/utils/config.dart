@@ -2,7 +2,7 @@ class AppConfig {
   // إعدادات API
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:8000"  # إذا كان الخادم يعمل على جهازك',
+    defaultValue: 'http://localhost:9000"  # إذا كان الخادم يعمل على جهازك',
   );
   
   static const String apiToken = String.fromEnvironment(

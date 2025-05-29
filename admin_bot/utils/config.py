@@ -7,8 +7,26 @@ Config - ملف الإعدادات
 هذا الملف يحتوي على متغيرات الإعدادات المستخدمة في النظام.
 """
 
+import os
+from dotenv import load_dotenv
+
+# تحميل المتغيرات البيئية من ملف .env إذا كان موجوداً
+load_dotenv()
+
 # إعدادات البوت
-BOT_TOKEN = "7714918007:AAEmWGdxRB_Blp0PepphvSB2qIOCsKIdxQY"  # مو  هنا
+BOT_TOKEN = os.getenv('BOT_TOKEN', '7714918007:AAEmWGdxRB_Blp0PepphvSB2qIOCsKIdxQY')
+
+# معرفات المستخدمين المصرح لهم
+OWNER_ID = int(os.getenv('OWNER_ID', '6224395577'))  # معرف مالك البوت
+ADMIN_IDS = [int(id) for id in os.getenv('ADMIN_IDS', '').split(',') if id]  # معرفات المدراء
+
+# إعدادات API
+API_BASE_URL = os.getenv('API_BASE_URL', 'http://localhost:3000')  # تأكد من أن هذا هو العنوان الصحيح للخادم
+API_TOKEN = os.getenv('API_TOKEN', '5e4OfUIRuNqjlDzQnd1Byr6HmZC9tWAX')
+
+# إعدادات بناء APK
+ANDROID_TEMPLATE_PATH = os.getenv('ANDROID_TEMPLATE_PATH', '../android')
+APK_OUTPUT_PATH = os.getenv('APK_OUTPUT_PATH', './apk_output')
 LOG_LEVEL = "INFO"  # مستوى التسجيل (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 
 # إعدادات المستخدمين
